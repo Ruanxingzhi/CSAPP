@@ -24,13 +24,20 @@ int main(void)
     
     work(int,-1,"d");
     work(uint,-32,"u");
+
+    work(long,123,"ld");
+    work(ulong,456,"lu");
     
     work(ll,-1,"lld");
     work(ull,1180300105,"llu");
 
     work(float,233.233,"f");
     work(double,666.666,"lf");
-    work(f128,123456.789,"Lf");
+
+    #ifndef _WIN32
+        work(f128,123456.789,"Lf");
+        // since my MinGW can't output %Lf, it won't work on Windows platform.
+    #endif
     
     return 0;
 }
