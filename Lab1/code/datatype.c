@@ -1,6 +1,5 @@
 #pragma GCC diagnostic ignored "-Wformat="
 #include <stdio.h>
-#include "my_types.h"    // <sys/types.h> is not enough...
 
 #define getHex(x,size) {printf("Hex: ");                            \
                         for(char i=0,*p=(char *)x;i<size;i++,p++)   \
@@ -13,6 +12,13 @@
 #define work(type,value,format)         \
         type my_##type = value;         \
         outputInfo(my_##type,format);
+
+typedef unsigned char uchar;
+typedef unsigned short ushort;
+typedef unsigned int uint;
+typedef unsigned long ulong;
+typedef long long ll;
+typedef unsigned long long ull;
 
 int main(void)
 {
@@ -33,11 +39,6 @@ int main(void)
 
     work(float,233.233,"f");
     work(double,666.666,"lf");
-
-    #ifndef _WIN32
-        work(f128,123456.789,"Lf");
-        // since my MinGW can't output %Lf, it won't work on Windows platform.
-    #endif
     
     return 0;
 }
