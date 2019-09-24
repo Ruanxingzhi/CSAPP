@@ -92,6 +92,62 @@ int divide_power2(int x,int k)
         最右边两位可能从1变成0. 这两位的权重是正值，故不会使x变得更大。
 */
 
+/*
+    2.86
+
+    Bias = 2**14-1 = 16383
+    最小的正非规格化数：    (2**-63)*(2**-16382) = 
+    TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    
+*/
+
+/*
+    2.90
+
+    -149
+    0
+    0
+
+    -126
+    0
+    1 << (149 + x)
+    
+    128
+    x + 127
+    0
+    
+    255
+    0
+*/
+
+typedef unsigned float_bits;
+
+// 2.94
+float_bits float_twice(float_bits f)
+{
+    unsigned sign = f>>31;              // f[31]
+    unsigned exp  = f>>23 & 0xFF;       // f[30:23]
+    unsigned frac = f     & 0x7FFFFF;   // f[22:0]
+
+    if(exp == 0)
+    {
+        if(frac & 0x400000)             // f[22]==1
+            exp = 1;
+        else
+            frac = frac << 1;
+    }
+    else if(exp == 0xFF)
+        return f;
+    else
+        exp += 1;
+    
+    return (sign<<31) | (exp << 23) | frac;
+}
+
+// just for test.
 int main(void)
 {
     printf("%d\n",is_little_endian());
@@ -104,4 +160,12 @@ int main(void)
 
     printf("%d %d\n",divide_power2(35,3),divide_power2(-35,3));
 
+    union{unsigned u;float f;}e,s;
+    e.f = 233.666;
+    s.u = float_twice(e.u);
+    e.f = e.f*2.0;
+    printf("native result  : %f [%#x]\n",e.f,e.u);
+    printf("my code result : %f [%#x]\n",s.f,s.u);
+    
+    return 0;
 }
