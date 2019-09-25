@@ -9,7 +9,7 @@
 // 2.58
 int is_little_endian()
 {
-    union judger{int w;char c;}test={1};
+    union {int w;char c;}test={1};
     return test.c;
 }
 
@@ -75,7 +75,7 @@ int divide_power2(int x,int k)
     2.82
 
     A.  false
-        反例：x=0,y=1
+        反例：x=INT_MIN,y=1
     B.  true
         注意到unsigned int值与模2**32意义下的加法、乘法运算构成环。
         由数学知识，不难推断两边恒等。
@@ -137,6 +137,11 @@ float_bits float_twice(float_bits f)
     }
     else if(exp == 0xFF)                // NaN和无穷大判断
         return f;
+    else if(exp == 0xFF-1)              // 极大值乘以2后变成无穷大
+    {
+        exp = 0xFF;
+        frac = 0;
+    }
     else
         exp += 1;
     
@@ -167,6 +172,13 @@ int main(void)
 
     // 极小值测验
     e.f = 1.1e-38;
+    s.u = float_twice(e.u);
+    e.f = e.f*2.0;
+    printf("native      : %f [%08x]\n",e.f,e.u);
+    printf("float_twice : %f [%08x]\n",s.f,s.u);
+
+    // 极大值测验
+    e.f = 3.3e+38;
     s.u = float_twice(e.u);
     e.f = e.f*2.0;
     printf("native      : %f [%08x]\n",e.f,e.u);
