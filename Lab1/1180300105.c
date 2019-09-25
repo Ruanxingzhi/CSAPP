@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <limits.h>
+#include <math.h>
 
 // 2.58
 int is_little_endian()
@@ -76,8 +77,8 @@ int divide_power2(int x,int k)
     A.  false
         反例：x=0,y=1
     B.  true
-        unsigned int值与模2**32意义下的加法，形成一个阿贝尔群。
-        由群论知识，不难推断两边恒等。
+        注意到unsigned int值与模2**32意义下的加法、乘法运算构成环。
+        由数学知识，不难推断两边恒等。
     C.  true
         左边 ≡ -x-1-y-1+1 ≡ -x-y-1      (mod 2**32)
         右边 ≡ -(x+y)-1 ≡ -x-y-1        (mod 2**32)
@@ -95,13 +96,9 @@ int divide_power2(int x,int k)
 /*
     2.86
 
-    Bias = 2**14-1 = 16383
-    最小的正非规格化数：    (2**-63)*(2**-16382) = 
-    TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    
+    最小的正非规格化数：    $ 2^{-63}*2^{-16382} = 2^{-16445} $      十进制下 3.6E-4951
+    最小的正规格化数：      $ 2^{-16382} $                          十进制下 3.4E-4932
+    最大的规格化数：       $2^{16383} * (2-eps) \approx 2^{16384}$  十进制下 1.2E4932    
 */
 
 /*
@@ -132,14 +129,13 @@ float_bits float_twice(float_bits f)
     unsigned exp  = f>>23 & 0xFF;       // f[30:23]
     unsigned frac = f     & 0x7FFFFF;   // f[22:0]
 
-    if(exp == 0)
+    if(exp == 0)                        // 非规格化
     {
-        if(frac & 0x400000)             // f[22]==1
-            exp = 1;
-        else
-            frac = frac << 1;
+        // 稍加推导可以发现，即使f[22]==1，这份代码依然正常工作。
+        // 因为frac左移一位之后，f[23]恰好变为1；f[22:0]恰好省略掉了整数位.
+        frac = frac << 1;
     }
-    else if(exp == 0xFF)
+    else if(exp == 0xFF)                // NaN和无穷大判断
         return f;
     else
         exp += 1;
@@ -161,11 +157,34 @@ int main(void)
     printf("%d %d\n",divide_power2(35,3),divide_power2(-35,3));
 
     union{unsigned u;float f;}e,s;
+
+    // 平凡情况
     e.f = 233.666;
     s.u = float_twice(e.u);
     e.f = e.f*2.0;
-    printf("native result  : %f [%#x]\n",e.f,e.u);
-    printf("my code result : %f [%#x]\n",s.f,s.u);
-    
+    printf("native      : %f [%08x]\n",e.f,e.u);
+    printf("float_twice : %f [%08x]\n",s.f,s.u);
+
+    // 极小值测验
+    e.f = 1.1e-38;
+    s.u = float_twice(e.u);
+    e.f = e.f*2.0;
+    printf("native      : %f [%08x]\n",e.f,e.u);
+    printf("float_twice : %f [%08x]\n",s.f,s.u);
+
+    // 无穷大测验
+    e.f = 1.0/0.0;
+    s.u = float_twice(e.u);
+    e.f = e.f*2.0;
+    printf("native      : %f [%08x]\n",e.f,e.u);
+    printf("float_twice : %f [%08x]\n",s.f,s.u);
+
+    // NaN测验
+    e.f = sqrt(-1);
+    s.u = float_twice(e.u);
+    e.f = e.f*2.0;
+    printf("native      : %f [%08x]\n",e.f,e.u);
+    printf("float_twice : %f [%08x]\n",s.f,s.u);
+
     return 0;
 }
