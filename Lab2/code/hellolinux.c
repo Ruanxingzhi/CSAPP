@@ -2,6 +2,6 @@
 
 int main(void)
 {
-    puts("Hello 1180300105ÎâÓêÂ×");
+    puts("Hello 11800300105å´é›¨ä¼¦");
     return 0;
 }
