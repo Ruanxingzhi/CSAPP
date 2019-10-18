@@ -11,7 +11,7 @@ int main(void)
     printf("-0 = %.50f\n",x.f);
 
     x.n = 0x00000001;
-    printf("min postive = %.50f\n",x.f);
+    printf("min postive = %.200f\n",x.f);
 
     x.n = 0x7f7fffff;
     printf("max positive = %.50f\n",x.f);
