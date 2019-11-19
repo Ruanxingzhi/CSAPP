@@ -377,9 +377,9 @@ Disassembly of section .text:
  8048c39:	55                   	push   %ebp
  8048c3a:	89 e5                	mov    %esp,%ebp
  8048c3c:	83 ec 08             	sub    $0x8,%esp
- 8048c3f:	a1 60 e1 04 08       	mov    0x804e160,%eax
+ 8048c3f:	a1 60 e1 04 08       	mov    0x804e160,%eax		; 这是global_value
  8048c44:	89 c2                	mov    %eax,%edx
- 8048c46:	a1 58 e1 04 08       	mov    0x804e158,%eax
+ 8048c46:	a1 58 e1 04 08       	mov    0x804e158,%eax		; 这是cookie
  8048c4b:	39 c2                	cmp    %eax,%edx
  8048c4d:	75 25                	jne    8048c74 <bang+0x3b>
  8048c4f:	a1 60 e1 04 08       	mov    0x804e160,%eax
