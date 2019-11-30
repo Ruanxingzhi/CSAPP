@@ -1,0 +1,2 @@
+lab:
+    push %rip
