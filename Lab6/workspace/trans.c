@@ -22,19 +22,20 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
+    int t0,t1,t2,t3,t4,t5,t6,t7;
     if(N==32 && M==32)
     {
         for(int i=0; i<M; i+=8)
             for(int j=0; j<N; j++)
             {
-                int t0 = A[j][i];
-                int t1 = A[j][i+1];
-                int t2 = A[j][i+2];
-                int t3 = A[j][i+3];
-                int t4 = A[j][i+4];
-                int t5 = A[j][i+5];
-                int t6 = A[j][i+6];
-                int t7 = A[j][i+7];
+                t0 = A[j][i];
+                t1 = A[j][i+1];
+                t2 = A[j][i+2];
+                t3 = A[j][i+3];
+                t4 = A[j][i+4];
+                t5 = A[j][i+5];
+                t6 = A[j][i+6];
+                t7 = A[j][i+7];
                 B[i][j] = t0;
                 B[i+1][j] = t1;
                 B[i+2][j] = t2;
@@ -43,6 +44,68 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
                 B[i+5][j] = t5;
                 B[i+6][j] = t6;
                 B[i+7][j] = t7;
+            }
+    }
+    if(N==64 && M==64)
+    {
+        for(int i=0; i<M; i+=8)
+            for(int j=0; j<N; j+=8)
+            {
+                for(int x=i; x<i+4; x++)
+                {
+                    t0 = A[x][j];
+                    t1 = A[x][j+1];
+                    t2 = A[x][j+2];
+                    t3 = A[x][j+3];
+                    t4 = A[x][j+4];
+                    t5 = A[x][j+5];
+                    t6 = A[x][j+6];
+                    t7 = A[x][j+7];
+                    
+                    B[j][x] = t0;
+                    B[j+1][x] = t1;
+                    B[j+2][x] = t2;
+                    B[j+3][x] = t3;
+
+                    B[j][x+4] = t4;
+                    B[j+1][x+4] = t5;
+                    B[j+2][x+4] = t6;
+                    B[j+3][x+4] = t7;
+                }
+                for(int y=j; y<j+4; y++)
+                {
+                    t0 = A[i+4][y];
+                    t1 = A[i+5][y];
+                    t2 = A[i+6][y];
+                    t3 = A[i+7][y];
+
+                    t4 = B[y][i+4];
+                    t5 = B[y][i+5];
+                    t6 = B[y][i+6];
+                    t7 = B[y][i+7];
+                    
+                    B[y][i+4] = t0;
+                    B[y][i+5] = t1;
+                    B[y][i+6] = t2;
+                    B[y][i+7] = t3;
+
+                    B[y+4][i] = t4;
+                    B[y+4][i+1] = t5;
+                    B[y+4][i+2] = t6;
+                    B[y+4][i+3] = t7;
+                }
+                for(int x=i+4; x<i+8; x++)
+                {
+                    t0 = A[x][j+4];
+                    t1 = A[x][j+5];
+                    t2 = A[x][j+6];
+                    t3 = A[x][j+7];
+
+                    B[j+4][x] = t0;
+                    B[j+5][x] = t1;
+                    B[j+6][x] = t2;
+                    B[j+7][x] = t3;
+                }
             }
     }
 }
