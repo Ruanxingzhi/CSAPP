@@ -61,12 +61,20 @@ void initCache()
     set_index_mask >>= b;
     set_index_mask <<= b;
 
+    // fprintf(stderr, "set_index_mask = %llx\n", set_index_mask);
+    // fprintf(stderr, "cache = %p\n", cache);
+    
+
     for(int se=0; se<S; se++)
     {
         cache[se] = (cache_line_t *)malloc(E * sizeof(cache_line_t));
+        // fprintf(stderr, "cache[%d] = %p\n", se, cache[se]);
+
 
         for(int line=0; line<E; line++)
         {
+            // fprintf(stderr, "  cache[%d][%d] = %p\n", se, line, &cache[se][line]);
+            
             cache[se][line].valid = 0;
             cache[se][line].tag = 0;
             cache[se][line].lru = 0;
@@ -98,11 +106,14 @@ void accessData(mem_addr_t addr)
     int se = (addr & set_index_mask) >> b;
     int victim = 0;
 
+    // fprintf(stderr, "Access %lld s=%d\n", addr, se);
+
     for(int line=0; line<E; line++)
         if(cache[se][line].valid && cache[se][line].tag == (addr >> (s+b)))
         {
             hit_count++;
             cache[se][line].lru = lru_counter++;
+            // fprintf(stderr, "Access cache[%d][%d] <%p> lru=%lld  (hit)\n", se, line, &cache[se][line], cache[se][line].lru);
             return;
         }
     
@@ -115,6 +126,8 @@ void accessData(mem_addr_t addr)
             cache[se][line].tag = (addr >> (s+b));
 
             cache[se][line].lru = lru_counter++;
+
+            // fprintf(stderr, "Access cache[%d][%d] <%p> lru=%lld  (miss)\n", se, line, &cache[se][line], cache[se][line].lru);
             return;
         }
     
@@ -122,10 +135,11 @@ void accessData(mem_addr_t addr)
 
     for(int line=0; line<E; line++)
         if(cache[se][line].lru < cache[se][victim].lru)
-            victim = se;
+            victim = line;
     
     cache[se][victim].tag = (addr >> (s+b));
     cache[se][victim].lru = lru_counter++;
+    // fprintf(stderr, "Access cache[%d][%d] <%p> lru=%lld  (victim)\n", se, victim, &cache[se][victim], cache[se][victim].lru);
 }
 
 

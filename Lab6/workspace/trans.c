@@ -108,6 +108,17 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
                 }
             }
     }
+
+    #define BLOCK 21
+
+    if(N==67 && M==61)
+    {
+        for(int i=0; i<M; i+=BLOCK)
+            for(int j=0; j<N; j+=BLOCK)
+                for(int x=i; x<M && x<i+BLOCK; x++)
+                    for(int y=j; y<N && y<j+BLOCK; y++)
+                        B[x][y] = A[y][x];
+    }
 }
 
 /* 
