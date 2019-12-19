@@ -302,22 +302,22 @@ int parseline(const char *cmdline, char **argv)
  */
 int builtin_cmd(char **argv) 
 {
-	if(!strcmp(argv[0], "quit"))
+	if(!strcmp(argv[0], "quit"))                            // 直接退出
 		exit(0);
 	
-	if(!strcmp(argv[0], "fg") || !strcmp(argv[0], "bg"))
+	if(!strcmp(argv[0], "fg") || !strcmp(argv[0], "bg"))    // 切换前后台
 	{
 		do_bgfg(argv);
 		return 1;
 	}
 	
-	if(!strcmp(argv[0], "jobs"))
+	if(!strcmp(argv[0], "jobs"))                            // 列出jobs
 	{
 		listjobs(jobs);
 		return 1;
 	}
 
-	return 0;     /* not a builtin command */
+	return 0;
 }
 
 /* 
@@ -382,7 +382,7 @@ void do_bgfg(char **argv)
  */
 void waitfg(pid_t pid)
 {
-	while(pid == fgpid(jobs))
+	while(pid == fgpid(jobs))               // 在等待子进程结束的期间啥也不干
 		sleep(0);
 	
     return;
@@ -405,13 +405,13 @@ void sigchld_handler(int sig)
     int status;
     pid_t pid;
 
-    while((pid = waitpid(-1, &status, WNOHANG | WUNTRACED)) > 0)
+    while((pid = waitpid(-1, &status, WNOHANG | WUNTRACED)) > 0)    // 对于僵尸进程
     {
-        if(WIFEXITED(status))
+        if(WIFEXITED(status))                                       // 正常结束
+            deletejob(jobs, pid);                                   
+        else if(WIFSIGNALED(status))                                // 异常结束
             deletejob(jobs, pid);
-        else if(WIFSIGNALED(status))
-            deletejob(jobs, pid);
-        else if(WIFSTOPPED(status))
+        else if(WIFSTOPPED(status))                                 // 收到停止信号
         {
             job = getjobpid(jobs, pid);
             if(job != NULL) job->state = ST;
@@ -428,11 +428,12 @@ void sigint_handler(int sig)
 {
     pid_t pid = fgpid(jobs);
     int job_id = pid2jid(pid);
+
     if(pid != 0)
     {
-        if(kill(-pid, sig) < 0)
+        if(kill(-pid, sig) < 0)                                         // kill失败的处理
             unix_error("kill failed");
-        printf("job [%d] terminated by singal %d.\n", job_id, SIGINT);
+        printf("job [%d] terminated by singal %d.\n", job_id, SIGINT);  // SIGINT停止程序
     }
 }
 
@@ -448,7 +449,7 @@ void sigtstp_handler(int sig)
     if(pid != 0)
     {
         if (kill(-pid, sig) < 0)
-            unix_error("kill failed");
+            unix_error("kill failed");                                  // kill失败
         printf("job [%d] terminated by singal %d.\n", job_id, SIGTSTP);
     }
 }
